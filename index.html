@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RecruitAI — Recruitment Intelligence Portal</title>
+  <meta name="description" content="AI-powered recruitment portal with bulk resume analysis, candidate ranking, fraud detection, and organizational benefit scoring.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Particles Background -->
+  <div class="particles-bg" id="particles-bg"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">R</div>
+      <div class="logo-text">Recruit<span>AI</span></div>
+      <div class="header-badge">Recruitment Portal</div>
+    </div>
+    <div class="nav-actions">
+      <button class="btn" id="btn-back-leaderboard" style="display:none;"><i class="fa-solid fa-arrow-left"></i> Back to Leaderboard</button>
+      <button class="btn btn-accent" id="btn-compare-trigger" style="display:none;"><i class="fa-solid fa-code-compare"></i> Compare Candidates</button>
+      <button class="btn btn-primary" id="btn-new-analysis"><i class="fa-solid fa-plus"></i> New Analysis</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ==================== SCREEN 1: INPUT PAGE ==================== -->
+    <div id="screen-input" class="app-screen">
+      
+      <!-- New Vacancy Details Card -->
+      <div class="vacancy-details-card glass-card card-animate">
+        <div class="card-title"><span><i class="fa-solid fa-building"></i> Vacancy Details</span></div>
+        <div class="vacancy-fields-grid">
+          <div class="vacancy-field">
+            <label class="form-label" for="input-job-title">Job Title / Position</label>
+            <input type="text" id="input-job-title" class="form-input" placeholder="e.g. Senior Software Engineer">
+          </div>
+          <div class="vacancy-field">
+            <label class="form-label" for="input-department">Department</label>
+            <select id="input-department" class="form-input">
+              <option value="Information Technology">Information Technology</option>
+              <option value="Engineering">Engineering</option>
+              <option value="Data Science">Data Science</option>
+              <option value="Cybersecurity">Cybersecurity</option>
+              <option value="Product">Product</option>
+              <option value="Operations">Operations</option>
+              <option value="Human Resources">Human Resources</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="vacancy-field">
+            <label class="form-label" for="input-location">Location</label>
+            <input type="text" id="input-location" class="form-input" placeholder="e.g. Denver, CO — On-site">
+          </div>
+          <div class="vacancy-field">
+            <label class="form-label" for="input-emp-type">Employment Type</label>
+            <select id="input-emp-type" class="form-input">
+              <option value="Full-Time">Full-Time</option>
+              <option value="Part-Time">Part-Time</option>
+              <option value="Contract">Contract</option>
+              <option value="Internship">Internship</option>
+              <option value="Remote">Remote</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Load Templates -->
+      <div class="template-bar card-animate">
+        <div class="template-info">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>Select an industry template to auto-fill inputs:</span>
+        </div>
+        <div class="template-buttons" id="template-btn-container"></div>
+      </div>
+
+      <div class="split-layout card-animate" style="margin-top: 1.5rem;">
+        <!-- Left: Text Inputs -->
+        <div class="glass-card">
+          <div class="card-title">
+            <span><i class="fa-solid fa-file-invoice"></i> Role Requirements & Applicant Resumes</span>
+            <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);" id="candidate-select-wrapper">
+              Candidate:
+              <select id="select-candidate-variant" style="background: var(--bg-tertiary); color: white; border: 1px solid var(--border-color); padding: 0.2rem; border-radius: 4px; outline: none;"></select>
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="input-jd">Job Description</label>
+            <textarea id="input-jd" class="form-textarea" placeholder="Paste the role requirements here... Include required skills, years of experience, certifications, and responsibilities."></textarea>
+          </div>
+
+          <!-- Bulk Upload Zone -->
+          <div class="form-group">
+            <label class="form-label">Upload Multiple Resumes (Bulk Mode)</label>
+            <div class="bulk-upload-area" id="bulk-drop-zone">
+              <div class="bulk-upload-icon"><i class="fa-solid fa-folder-open"></i></div>
+              <div class="bulk-upload-text">Drag & drop <span>multiple .txt files</span> or click to browse</div>
+              <div class="bulk-counter" id="bulk-file-count"></div>
+            </div>
+            <input type="file" id="bulk-file-input" style="display: none;" accept=".txt,.json" multiple>
+            <div class="delimiter-info">💡 Or paste all resumes below separated by <strong>===</strong> on its own line</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="input-resume">Candidate Resume(s)</label>
+            <!-- Single file upload -->
+            <div class="file-upload-zone" id="drop-zone">
+              <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+              <div class="upload-text">Drag & drop a single resume file or <span>browse files</span></div>
+            </div>
+            <input type="file" id="file-input" style="display: none;" accept=".txt,.json">
+
+            <textarea id="input-resume" class="form-textarea" style="height: 300px;" placeholder="Paste the candidate resume text here...&#10;&#10;For BULK analysis, paste multiple resumes separated by === on its own line:&#10;&#10;John Doe&#10;Summary: ...&#10;===&#10;Jane Smith&#10;Summary: ..."></textarea>
+          </div>
+        </div>
+
+        <!-- Right: Configurations & Weights -->
+        <div class="config-sidebar">
+          <div class="glass-card">
+            <div class="card-title">
+              <span><i class="fa-solid fa-sliders"></i> Adjust Scoring Weights</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.4;">
+              Customize the importance of each metric. Total must equal 100%.
+            </p>
+            <div class="weight-slider-group">
+              <div class="slider-item">
+                <div class="slider-header"><span>Required Skills Match</span><span class="val" id="val-w-skills">40%</span></div>
+                <input type="range" class="slider-input" id="slider-w-skills" min="0" max="100" value="40">
+              </div>
+              <div class="slider-item">
+                <div class="slider-header"><span>Certifications Matching</span><span class="val" id="val-w-certs">15%</span></div>
+                <input type="range" class="slider-input" id="slider-w-certs" min="0" max="100" value="15">
+              </div>
+              <div class="slider-item">
+                <div class="slider-header"><span>Experience Alignment</span><span class="val" id="val-w-exp">15%</span></div>
+                <input type="range" class="slider-input" id="slider-w-exp" min="0" max="100" value="15">
+              </div>
+              <div class="slider-item">
+                <div class="slider-header"><span>Education Level</span><span class="val" id="val-w-edu">10%</span></div>
+                <input type="range" class="slider-input" id="slider-w-edu" min="0" max="100" value="10">
+              </div>
+              <div class="slider-item">
+                <div class="slider-header"><span>Additional Relevant Skills</span><span class="val" id="val-w-add">10%</span></div>
+                <input type="range" class="slider-input" id="slider-w-add" min="0" max="100" value="10">
+              </div>
+              <div class="slider-item">
+                <div class="slider-header"><span>Project Relevance</span><span class="val" id="val-w-proj">10%</span></div>
+                <input type="range" class="slider-input" id="slider-w-proj" min="0" max="100" value="10">
+              </div>
+            </div>
+            <div style="margin-top: 1.5rem;">
+              <div class="weight-summary valid" id="weight-summary-box">
+                <span>Total Weights:</span>
+                <strong id="val-w-total">100%</strong>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <button class="btn btn-primary" id="btn-run-analysis" style="width: 100%; padding: 1rem; font-size: 1.1rem; justify-content: center;">
+              <i class="fa-solid fa-brain"></i> Run AI Assessment
+            </button>
+            <button class="btn btn-accent" id="btn-run-bulk" style="width: 100%; padding: 1rem; font-size: 1.1rem; justify-content: center;">
+              <i class="fa-solid fa-users-viewfinder"></i> Run Bulk Assessment (All Resumes)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 2: PROCESSING LOADER ==================== -->
+    <div id="screen-loading" class="app-screen" style="display: none;">
+      <div class="glass-card scanner-overlay">
+        <div class="radar-spinner">
+          <div class="radar-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        </div>
+        <h2 class="scanner-text" id="loading-title">Evaluating Candidate Suitability</h2>
+        <p class="scanner-subtext" id="loading-step-text">Initializing recruitment evaluation model...</p>
+        <div class="progress-bar-wrapper">
+          <div class="progress-bar-fill" id="loading-progress-bar"></div>
+        </div>
+        <div class="batch-progress" id="batch-progress-info" style="display: none;">
+          <div class="batch-counter" id="batch-counter-text">Processing 0 / 0</div>
+          <div class="batch-name" id="batch-name-text">...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 3: LEADERBOARD ==================== -->
+    <div id="screen-leaderboard" class="app-screen" style="display: none;">
+      
+      <!-- Vacancy Info Bar -->
+      <div class="vacancy-info-bar glass-card card-animate" id="vacancy-info-bar" style="display:none;">
+        <div class="vacancy-bar-item"><i class="fa-solid fa-briefcase"></i><div><div class="vacancy-bar-label">Position</div><div class="vacancy-bar-value" id="vacancy-bar-title">—</div></div></div>
+        <div class="vacancy-bar-item"><i class="fa-solid fa-building-columns"></i><div><div class="vacancy-bar-label">Department</div><div class="vacancy-bar-value" id="vacancy-bar-dept">—</div></div></div>
+        <div class="vacancy-bar-item"><i class="fa-solid fa-location-dot"></i><div><div class="vacancy-bar-label">Location</div><div class="vacancy-bar-value" id="vacancy-bar-location">—</div></div></div>
+        <div class="vacancy-bar-item"><i class="fa-solid fa-clock"></i><div><div class="vacancy-bar-label">Type</div><div class="vacancy-bar-value" id="vacancy-bar-type">—</div></div></div>
+        <div class="vacancy-bar-item"><i class="fa-solid fa-calendar"></i><div><div class="vacancy-bar-label">Posted</div><div class="vacancy-bar-value" id="vacancy-bar-date">—</div></div></div>
+        <div class="vacancy-bar-item"><i class="fa-solid fa-users"></i><div><div class="vacancy-bar-label">Applicants</div><div class="vacancy-bar-value" id="vacancy-bar-applicants">0</div></div></div>
+      </div>
+
+      <div class="glass-card leaderboard-container card-animate">
+        <div class="leaderboard-header">
+          <div class="leaderboard-title">
+            <i class="fa-solid fa-trophy" style="color: #fbbf24;"></i>
+            <span>Candidate Leaderboard</span>
+          </div>
+          <div class="leaderboard-stats">
+            <div class="leaderboard-stat stat-card-enhanced">
+              <span class="leaderboard-stat-val" id="lb-total-count" style="color: var(--primary);">0</span>
+              <span class="leaderboard-stat-label">Total Applicants</span>
+            </div>
+            <div class="leaderboard-stat stat-card-enhanced">
+              <span class="leaderboard-stat-val" id="lb-avg-score" style="color: var(--accent);">0</span>
+              <span class="leaderboard-stat-label">Average Score</span>
+            </div>
+            <div class="leaderboard-stat stat-card-enhanced">
+              <span class="leaderboard-stat-val" id="lb-flagged-count" style="color: var(--weak);">0</span>
+              <span class="leaderboard-stat-label">Flagged Resumes</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Pick Card -->
+        <div class="top-pick-card" id="top-pick-card" style="display: none;">
+          <div class="top-pick-crown">👑</div>
+          <div class="top-pick-info">
+            <div class="top-pick-label"><i class="fa-solid fa-star"></i> Top Pick Recommendation</div>
+            <div class="top-pick-name" id="top-pick-name">—</div>
+            <div class="top-pick-summary" id="top-pick-summary">—</div>
+          </div>
+          <div class="top-pick-score-box">
+            <div class="top-pick-score-val" id="top-pick-score">0</div>
+            <div class="top-pick-score-label">Overall Score</div>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar" id="filter-bar">
+          <button class="filter-btn active" data-filter="all"><i class="fa-solid fa-list"></i> All</button>
+          <button class="filter-btn" data-filter="excellent"><i class="fa-solid fa-circle" style="color:var(--excellent);font-size:0.5rem;"></i> Excellent (90+)</button>
+          <button class="filter-btn" data-filter="strong"><i class="fa-solid fa-circle" style="color:var(--strong);font-size:0.5rem;"></i> Strong (75-89)</button>
+          <button class="filter-btn" data-filter="moderate"><i class="fa-solid fa-circle" style="color:var(--moderate);font-size:0.5rem;"></i> Moderate (60-74)</button>
+          <button class="filter-btn" data-filter="weak"><i class="fa-solid fa-circle" style="color:var(--weak);font-size:0.5rem;"></i> Weak (&lt;60)</button>
+          <button class="filter-btn" data-filter="flagged"><i class="fa-solid fa-flag" style="color:var(--weak);"></i> Fraud Flagged</button>
+        </div>
+
+        <!-- Leaderboard Table -->
+        <div style="overflow-x: auto;">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th data-sort="rank"># <i class="fa-solid fa-sort"></i></th>
+                <th data-sort="name">Candidate <i class="fa-solid fa-sort"></i></th>
+                <th data-sort="score">Score <i class="fa-solid fa-sort"></i></th>
+                <th data-sort="category">Category</th>
+                <th data-sort="fraud">Verification <i class="fa-solid fa-sort"></i></th>
+                <th data-sort="talents">Hidden Talents</th>
+                <th data-sort="benefit">Org Benefit <i class="fa-solid fa-sort"></i></th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 4: INDIVIDUAL DASHBOARD ==================== -->
+    <div id="screen-dashboard" class="app-screen" style="display: none;">
+      
+      <!-- Breadcrumb Navigation -->
+      <div class="breadcrumb-bar" id="breadcrumb-bar">
+        <span class="breadcrumb-item"><i class="fa-solid fa-building"></i> Portal</span>
+        <span class="breadcrumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+        <span class="breadcrumb-item breadcrumb-link" id="breadcrumb-leaderboard">Leaderboard</span>
+        <span class="breadcrumb-sep"><i class="fa-solid fa-chevron-right"></i></span>
+        <span class="breadcrumb-item active" id="breadcrumb-candidate-name">Candidate</span>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Sidebar: session candidates list -->
+        <div class="candidates-sidebar">
+          <div class="glass-card" style="padding: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+            <div class="card-title" style="margin-bottom: 0.5rem; border-left: none; padding-left: 0;">
+              <span><i class="fa-solid fa-users"></i> Session Profiles</span>
+            </div>
+            <div class="candidate-list" id="sidebar-candidates-container"></div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <button class="btn btn-accent" id="btn-compare-sidebar" style="width: 100%; justify-content: center; font-size: 0.8rem;">
+                <i class="fa-solid fa-code-compare"></i> Compare Checked
+              </button>
+              <button class="btn" id="btn-clear-session" style="width: 100%; justify-content: center; font-size: 0.8rem;">
+                <i class="fa-solid fa-trash-can"></i> Clear Session
+              </button>
+            </div>
+          </div>
+
+          <!-- Dashboard Weight Sliders -->
+          <div class="glass-card" style="padding: 1rem;">
+            <div class="card-title" style="margin-bottom: 0.5rem; border-left: none; padding-left: 0;">
+              <span><i class="fa-solid fa-sliders"></i> Real-time Weights</span>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Slide to adjust weights and recalculate candidate score in real-time.
+            </p>
+            <div class="weight-slider-group" id="dashboard-sliders-container"></div>
+          </div>
+        </div>
+
+        <!-- Main Report Dashboard -->
+        <div class="report-panel">
+          <!-- Action controls -->
+          <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <button class="btn btn-accent" id="btn-export-pdf"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+            <button class="btn" id="btn-export-json"><i class="fa-solid fa-copy"></i> Copy Raw JSON</button>
+          </div>
+
+          <!-- Hero: Overall score & Recruiter summary -->
+          <div class="glass-card">
+            <div class="score-hero-row">
+              <div class="radial-score-container">
+                <div class="radial-gauge">
+                  <svg width="140" height="140">
+                    <circle class="bg" cx="70" cy="70" r="60"></circle>
+                    <circle class="fill" id="dashboard-radial-fill" cx="70" cy="70" r="60" stroke="var(--primary)"></circle>
+                  </svg>
+                  <div class="radial-text">
+                    <span class="radial-score-num" id="dashboard-score-val">0</span>
+                    <span class="radial-score-max">/ 100</span>
+                  </div>
+                </div>
+                <div class="score-badge" id="dashboard-category-badge">Excellent</div>
+                <div class="ranking-stat">Ranked <span>top <span id="dashboard-rank-pct">0</span>%</span></div>
+              </div>
+              <div class="summary-container">
+                <div class="form-label" style="margin-bottom: 0.25rem;">Recruiter Executive Summary</div>
+                <blockquote class="recruiter-quote" id="dashboard-recruiter-summary">Loading executive summary...</blockquote>
+              </div>
+            </div>
+          </div>
+
+          <!-- Details Grid -->
+          <div class="details-grid">
+            <!-- Left Side -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+              <!-- Score breakdown -->
+              <div class="glass-card">
+                <div class="card-title"><span><i class="fa-solid fa-chart-bar"></i> Suitability Breakdown</span></div>
+                <div class="score-bars-list" id="dashboard-bars-container"></div>
+              </div>
+
+              <!-- Uniqueness & Learning Agility Gauges -->
+              <div class="mini-gauges-row">
+                <div class="glass-card mini-gauge-card">
+                  <div class="mini-gauge-radial">
+                    <svg width="70" height="70">
+                      <circle class="bg" cx="35" cy="35" r="30"></circle>
+                      <circle class="fill" id="gauge-fill-agility" cx="35" cy="35" r="30" stroke="var(--accent)" stroke-dasharray="188" stroke-dashoffset="188"></circle>
+                    </svg>
+                    <div class="mini-gauge-text" id="gauge-val-agility">0</div>
+                  </div>
+                  <div class="mini-gauge-info">
+                    <span class="mini-gauge-label">Learning Agility</span>
+                    <span class="mini-gauge-desc" id="gauge-desc-agility">—</span>
+                  </div>
+                </div>
+                <div class="glass-card mini-gauge-card">
+                  <div class="mini-gauge-radial">
+                    <svg width="70" height="70">
+                      <circle class="bg" cx="35" cy="35" r="30"></circle>
+                      <circle class="fill" id="gauge-fill-uniqueness" cx="35" cy="35" r="30" stroke="var(--secondary)" stroke-dasharray="188" stroke-dashoffset="188"></circle>
+                    </svg>
+                    <div class="mini-gauge-text" id="gauge-val-uniqueness">0</div>
+                  </div>
+                  <div class="mini-gauge-info">
+                    <span class="mini-gauge-label">Candidate Uniqueness</span>
+                    <span class="mini-gauge-desc" id="gauge-desc-uniqueness">—</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Explainable AI -->
+              <div class="glass-card">
+                <div class="card-title"><span><i class="fa-solid fa-shield-virus"></i> Explainable AI Ranking Context</span></div>
+                <div class="explainable-list" id="dashboard-explainable-container"></div>
+              </div>
+
+              <!-- Certification Quality -->
+              <div class="glass-card">
+                <div class="card-title"><span><i class="fa-solid fa-award"></i> Certification Quality Analysis</span></div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  Credibility Rating: <strong id="dashboard-cert-credibility" style="color: white;">N/A</strong> | Score: <strong id="dashboard-cert-score" style="color: var(--accent);">0/100</strong>
+                </div>
+                <table class="certs-table">
+                  <thead><tr><th>Issuer</th><th>Certification Title</th><th>Credibility</th></tr></thead>
+                  <tbody id="dashboard-certs-tbody"></tbody>
+                </table>
+              </div>
+
+              <!-- 🔍 FRAUD DETECTION (NEW) -->
+              <div class="glass-card">
+                <div class="card-title"><span><i class="fa-solid fa-user-secret"></i> Fraud & Verification Analysis</span></div>
+                <div class="fraud-card" id="dashboard-fraud-card">
+                  <div class="fraud-header">
+                    <div class="fraud-score-display">
+                      <span class="fraud-score-num" id="fraud-verification-score">100</span>
+                      <div>
+                        <div class="fraud-score-label">Verification Confidence</div>
+                        <span class="risk-level-badge" id="fraud-risk-badge">Low Risk</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="fraud-flags-list" id="fraud-flags-container">
+                    <div class="no-fraud-message"><i class="fa-solid fa-circle-check"></i> No fraudulent indicators detected.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Side -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+              <!-- Hidden Talents -->
+              <div class="glass-card">
+                <div class="card-title"><span><i class="fa-solid fa-wand-magic"></i> Hidden Talent Detection</span></div>
+                <div class="badge-container" id="dashboard-talents-badges"></div>
+                <div class="insight-text" id="dashboard-talents-insight">—</div>
+              </div>
+
+              <!-- Skill Gaps -->
+              <div class="glass-card">
+                <div class="card-title"><span><i class="fa-solid fa-graduation-cap"></i> Skill Gap Analysis</span></div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">Missing Required Competencies:</div>
+                <div class="badge-container" id="dashboard-gaps-badges"></div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem; margin-bottom: 0.5rem;">Recommended Upskilling Pathway:</div>
+                <div class="learning-path-list" id="dashboard-learning-path"></div>
+              </div>
+
+              <!-- 💎 ORGANIZATIONAL BENEFIT (NEW) -->
+              <div class="glass-card">
+                <div class="card-title"><span><i class="fa-solid fa-building-shield"></i> Organizational Benefit Analysis</span></div>
+                <div class="org-benefit-grid" id="org-benefit-grid">
+                  <div class="org-benefit-item">
+                    <div class="org-benefit-icon cross"><i class="fa-solid fa-arrows-split-up-and-left"></i></div>
+                    <div class="org-benefit-info">
+                      <span class="org-benefit-label">Cross-Functional</span>
+                      <span class="org-benefit-val" id="org-cross-val">0/100</span>
+                    </div>
+                  </div>
+                  <div class="org-benefit-item">
+                    <div class="org-benefit-icon cost"><i class="fa-solid fa-piggy-bank"></i></div>
+                    <div class="org-benefit-info">
+                      <span class="org-benefit-label">Cost Savings</span>
+                      <span class="org-benefit-val" id="org-cost-val">0/100</span>
+                    </div>
+                  </div>
+                  <div class="org-benefit-item">
+                    <div class="org-benefit-icon mentor"><i class="fa-solid fa-chalkboard-user"></i></div>
+                    <div class="org-benefit-info">
+                      <span class="org-benefit-label">Mentoring Ability</span>
+                      <span class="org-benefit-val" id="org-mentor-val">0/100</span>
+                    </div>
+                  </div>
+                  <div class="org-benefit-item">
+                    <div class="org-benefit-icon innovate"><i class="fa-solid fa-lightbulb"></i></div>
+                    <div class="org-benefit-info">
+                      <span class="org-benefit-label">Innovation Potential</span>
+                      <span class="org-benefit-val" id="org-innovate-val">0/100</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="org-benefit-summary" id="org-benefit-summary">—</div>
+              </div>
+
+              <!-- Project Relevance -->
+              <div class="glass-card">
+                <div class="card-title"><span><i class="fa-solid fa-diagram-project"></i> Project Relevance Analysis</span></div>
+                <div class="projects-list" id="dashboard-projects-container"></div>
+              </div>
+
+              <!-- Risk Assessment -->
+              <div class="glass-card risk-card" id="dashboard-risk-card">
+                <div class="risk-level-row">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                  <span>Hiring Risk:</span>
+                  <span class="risk-level-badge" id="dashboard-risk-level">Low</span>
+                </div>
+                <ul class="risk-reasons-list" id="dashboard-risk-reasons"></ul>
+              </div>
+
+              <!-- Interview Questions -->
+              <div class="glass-card">
+                <div class="card-title"><span><i class="fa-solid fa-comments"></i> Generated Interview Questions</span></div>
+                <div class="interview-box" id="dashboard-interview-container"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Raw JSON -->
+          <div class="glass-card json-viewer-card">
+            <div class="card-title" id="json-viewer-header" style="cursor: pointer; user-select: none;">
+              <span><i class="fa-solid fa-code"></i> Raw AI Recruitment Assessment JSON</span>
+              <span id="json-toggle-icon"><i class="fa-solid fa-chevron-down"></i></span>
+            </div>
+            <div id="json-viewer-content" style="display: none; margin-top: 1rem;">
+              <pre class="json-pre"><code id="dashboard-raw-json">{}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer" id="app-footer">
+    <div class="footer-content">
+      <div class="footer-brand"><span class="footer-logo">R</span><span>Powered by <strong>RecruitAI</strong> Engine v2.0</span></div>
+      <div class="footer-info">AI-Driven Recruitment Intelligence Platform</div>
+    </div>
+  </footer>
+
+  <!-- Modal: Candidate Comparison -->
+  <div class="modal-overlay" id="compare-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-code-compare"></i> Candidate Suitability Comparison</h3>
+        <button class="btn-icon" id="btn-close-modal" style="font-size: 1.25rem;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <table class="comparison-table">
+          <thead><tr id="compare-table-head"><th>Criteria</th></tr></thead>
+          <tbody id="compare-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="templates.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
