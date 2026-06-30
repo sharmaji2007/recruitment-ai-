@@ -168,6 +168,18 @@ header {
   border-color: #22d3ee;
 }
 
+/* Disabled button states (weight validation) */
+.btn:disabled,
+.btn-primary:disabled,
+.btn-accent:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+  transform: none !important;
+  box-shadow: none !important;
+  filter: grayscale(60%);
+}
+
 main {
   flex: 1;
   max-width: 1400px;

@@ -363,6 +363,8 @@ function setupEventListeners() {
    SINGLE ANALYSIS WORKFLOW
    ============================================================ */
 function runSingleAnalysis() {
+  const weightSum = Object.values(state.currentWeights).reduce((a, b) => a + b, 0);
+  if (weightSum !== 100) { alert(`Scoring weights must total exactly 100%. Current total: ${weightSum}%. Please adjust the sliders before running.`); return; }
   const jd = el.inputJd.value.trim();
   const resume = el.inputResume.value.trim();
   if (!jd || !resume) { alert("Please fill in both the Job Description and the Candidate Resume."); return; }
@@ -405,6 +407,8 @@ function runSingleAnalysis() {
    BULK ANALYSIS WORKFLOW
    ============================================================ */
 function runBulkAnalysis() {
+  const weightSum = Object.values(state.currentWeights).reduce((a, b) => a + b, 0);
+  if (weightSum !== 100) { alert(`Scoring weights must total exactly 100%. Current total: ${weightSum}%. Please adjust the sliders before running.`); return; }
   const jd = el.inputJd.value.trim();
   if (!jd) { alert("Please fill in the Job Description."); return; }
   captureVacancyMeta();
@@ -971,6 +975,19 @@ function renderDashboardWeightsSliders(activeCand) {
       const nv = parseInt(e.target.value);
       valLabel.textContent = `${nv}%`;
       w[key] = nv;
+      // Validate total weights before recalculating
+      const dashTotal = Object.values(w).reduce((a, b) => a + b, 0);
+      const dashStatus = el.dashboardSlidersContainer.parentElement.querySelector('.dash-weight-status');
+      if (dashStatus) dashStatus.remove();
+      const statusEl = document.createElement('div');
+      statusEl.className = 'dash-weight-status';
+      if (dashTotal !== 100) {
+        statusEl.innerHTML = `<span style="color:var(--weak);font-size:0.75rem;font-weight:600;padding:0.4rem 0.6rem;display:block;text-align:center;background:rgba(239,68,68,0.08);border-radius:6px;margin-top:0.5rem;">⚠ Total: ${dashTotal}% (Must = 100%)</span>`;
+        el.dashboardSlidersContainer.parentElement.appendChild(statusEl);
+        return; // Don't recalculate with invalid weights
+      }
+      statusEl.innerHTML = `<span style="color:var(--excellent);font-size:0.75rem;font-weight:600;padding:0.4rem 0.6rem;display:block;text-align:center;background:rgba(16,185,129,0.08);border-radius:6px;margin-top:0.5rem;">✓ Total: 100%</span>`;
+      el.dashboardSlidersContainer.parentElement.appendChild(statusEl);
       const nr = analyzeRecruitment(activeCand.jd, activeCand.resume, w);
       activeCand.report = nr;
       state.candidatesList[state.activeCandidateId] = activeCand;
